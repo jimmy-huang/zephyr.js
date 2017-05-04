@@ -27,6 +27,12 @@ static jerry_value_t zjs_pme_prototype;
         }                                                                  \
     })
 
+#define CALL_REMOTE_FUNCTION_NO_REPLY(send) \
+    ({                                      \
+        zjs_ipm_message_t reply;            \
+        CALL_REMOTE_FUNCTION(send, reply);  \
+    })
+
 static bool zjs_pme_ipm_send_sync(zjs_ipm_message_t *send,
                                   zjs_ipm_message_t *result) {
     send->id = MSG_ID_PME;
@@ -74,26 +80,26 @@ static void ipm_msg_receive_callback(void *context, uint32_t id, volatile void *
 
 static ZJS_DECL_FUNC(zjs_pme_begin)
 {
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_BEGIN;
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
 static ZJS_DECL_FUNC(zjs_pme_forget)
 {
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_FORGET;
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
 static ZJS_DECL_FUNC(zjs_pme_configure)
 {
     ZJS_VALIDATE_ARGS(Z_NUMBER, Z_NUMBER, Z_NUMBER, Z_NUMBER, Z_NUMBER);
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_CONFIGURE;
 
     send.data.pme.g_context = jerry_get_number_value(argv[0]);
@@ -101,7 +107,7 @@ static ZJS_DECL_FUNC(zjs_pme_configure)
     send.data.pme.d_mode = jerry_get_number_value(argv[2]);
     send.data.pme.min_if = jerry_get_number_value(argv[3]);
     send.data.pme.max_if = jerry_get_number_value(argv[4]);
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -115,7 +121,7 @@ static ZJS_DECL_FUNC(zjs_pme_learn)
         return zjs_error("exceeded max vector size");
     }
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_LEARN;
     for (int i = 0; i < array_len; i++) {
         ZVAL vector = jerry_get_property_by_index(array, i);
@@ -129,7 +135,7 @@ static ZJS_DECL_FUNC(zjs_pme_learn)
     send.data.pme.vector_size = array_len;
     send.data.pme.category = jerry_get_number_value(argv[1]);
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -194,7 +200,7 @@ static ZJS_DECL_FUNC(zjs_pme_write_vector)
         return zjs_error("exceeded max vector size");
     }
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_WRITE_VECTOR;
     for (int i = 0; i < array_len; i++) {
         ZVAL vector = jerry_get_property_by_index(array, i);
@@ -208,7 +214,7 @@ static ZJS_DECL_FUNC(zjs_pme_write_vector)
     send.data.pme.vector_size = array_len;
     send.data.pme.category = jerry_get_number_value(argv[1]);
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -234,11 +240,11 @@ static ZJS_DECL_FUNC(zjs_pme_set_global_context)
 {
     ZJS_VALIDATE_ARGS(Z_NUMBER);
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_SET_GLOBAL_CONTEXT;
     send.data.pme.g_context = jerry_get_number_value(argv[0]);
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -255,11 +261,11 @@ static ZJS_DECL_FUNC(zjs_pme_set_neuron_context)
 {
     ZJS_VALIDATE_ARGS(Z_NUMBER);
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_SET_NEURON_CONTEXT;
     send.data.pme.n_context = jerry_get_number_value(argv[0]);
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -276,11 +282,11 @@ static ZJS_DECL_FUNC(zjs_pme_set_classifier_mode)
 {
     ZJS_VALIDATE_ARGS(Z_NUMBER);
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_SET_CLASSIFIER_MODE;
     send.data.pme.c_mode = jerry_get_number_value(argv[0]);
 
-    CALL_REMOTE_FUNCTION(send, reply);
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
     return ZJS_UNDEFINED;
 }
 
@@ -297,9 +303,61 @@ static ZJS_DECL_FUNC(zjs_pme_set_distance_mode)
 {
     ZJS_VALIDATE_ARGS(Z_NUMBER);
 
-    zjs_ipm_message_t send, reply;
+    zjs_ipm_message_t send;
     send.type = TYPE_PME_SET_DISTANCE_MODE;
     send.data.pme.d_mode = jerry_get_number_value(argv[0]);
+
+    CALL_REMOTE_FUNCTION_NO_REPLY(send);
+    return ZJS_UNDEFINED;
+}
+
+static ZJS_DECL_FUNC(zjs_pme_save_neurons)
+{
+    ZJS_VALIDATE_ARGS(Z_ARRAY);
+
+    zjs_ipm_message_t send, reply;
+    send.type = TYPE_PME_SAVE_NEURONS;
+    send.data.pme.d_mode = jerry_get_number_value(argv[0]);
+
+    CALL_REMOTE_FUNCTION(send, reply);
+    return ZJS_UNDEFINED;
+}
+
+static ZJS_DECL_FUNC(zjs_pme_restore_neurons)
+{
+    ZJS_VALIDATE_ARGS(Z_ARRAY);
+    jerry_value_t array = argv[0];
+    uint32_t array_len = jerry_get_array_length(array);
+
+    if (array_len > 128) {
+        return zjs_error("exceeded max neuron size");
+    }
+
+    for (int i = 0; i < array_len; i++) {
+        uint32_t context, aif, min_aif, category;
+
+        ZVAL neuron = jerry_get_property_by_index(array, i);
+        if (!zjs_obj_get_uint32(neuron, "context", &context)) {
+            return zjs_error("invalid Neuron, missing context");
+        }
+        if (!zjs_obj_get_uint32(neuron, "influence", &aif)) {
+            return zjs_error("invalid Neuron, missing influence");
+        }
+        if (!zjs_obj_get_uint32(neuron, "minInfluence", &min_aif)) {
+            return zjs_error("invalid Neuron, missing minInfluence");
+        }
+        if (!zjs_obj_get_uint32(neuron, "category", &category)) {
+            return zjs_error("invalid Neuron, missing category");
+        }
+        //uint8_t byte = jerry_get_number_value(vector);
+        //memcpy(&send.data.pme.vector[i], &byte, sizeof(uint8_t));
+    }
+
+    zjs_ipm_message_t send, reply;
+    send.type = TYPE_PME_RESTORE_NEURONS;
+    send.data.pme.n_context = jerry_get_number_value(argv[0]);
+    send.data.pme.influence = jerry_get_number_value(argv[4]);
+    send.data.pme.min_influence = jerry_get_number_value(argv[3]);
 
     CALL_REMOTE_FUNCTION(send, reply);
     return ZJS_UNDEFINED;
@@ -330,6 +388,8 @@ jerry_value_t zjs_pme_init()
         { zjs_pme_set_classifier_mode, "setClassifierMode" },
         { zjs_pme_get_distance_mode, "getDistanceMode" },
         { zjs_pme_set_distance_mode, "setDistanceMode" },
+        { zjs_pme_save_neurons, "saveNeurons" },
+        { zjs_pme_restore_neurons, "restoreNeurons" },
         { NULL, NULL }
     };
     zjs_pme_prototype = jerry_create_object();

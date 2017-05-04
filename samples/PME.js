@@ -17,6 +17,7 @@ var classify4 = [ 25, 25, 25, 25 ];
 var classify5 = [ 30, 30, 30, 30 ];
 
 function pme_stats() {
+    console.log("");
     console.log("PME statistics");
     console.log("==============:");
     var mode = pme.getClassifierMode();

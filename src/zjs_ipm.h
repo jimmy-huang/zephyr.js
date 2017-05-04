@@ -88,6 +88,8 @@ enum {
 #define TYPE_PME_SET_CLASSIFIER_MODE                       0x004D
 #define TYPE_PME_GET_DISTANCE_MODE                         0x004E
 #define TYPE_PME_SET_DISTANCE_MODE                         0x004F
+#define TYPE_PME_SAVE_NEURONS                              0x0050
+#define TYPE_PME_RESTORE_NEURONS                           0x0051
 
 typedef struct zjs_ipm_message {
     uint32_t id;
