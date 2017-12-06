@@ -27,19 +27,8 @@ matrix:
   fast_finish: true
   include:
     - os: linux
-      env: TARGET="zephyr"
-    - os: linux
-      env: TARGET="extra"
-    - os: linux
-      env: TARGET="linux"
-    - os: linux
       dist: trusty
       env: TARGET="ashell"
-    - os: osx
-      osx_image: xcode9.1
-      env: TARGET="linux"
-  allow_failures:
-    - os: osx
 
 cache:
   directories:
