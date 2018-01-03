@@ -28,7 +28,7 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      env: TARGET="ashell"
+      env: TARGET="linux"
 
 cache:
   directories:

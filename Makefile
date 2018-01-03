@@ -457,7 +457,7 @@ linux: generate
 		-DV=$(V) \
 		-DVARIANT=$(VARIANT) \
 		-H. && \
-	make -C $(OUT)/linux;
+	make VERBOSE=1 -C $(OUT)/linux;
 
 .PHONY: help
 help:

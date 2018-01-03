@@ -445,7 +445,7 @@ if [ "$RUN" == "all" -o "$RUN" == "3" ]; then
     try_command "headers" checkheaders -v
 
     # linux build tests
-    try_command "linux" make $VERBOSE BOARD=linux
+    try_command "linux" make VERBOSE=1 BOARD=linux
 
     # linux unit tests
     try_command "unit tests" ./outdir/linux/release/jslinux --unittest
